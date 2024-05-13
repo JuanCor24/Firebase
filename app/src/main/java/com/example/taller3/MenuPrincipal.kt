@@ -14,12 +14,11 @@ import com.google.firebase.auth.auth
 import com.google.firebase.database.database
 
 
-class MenuPrincipal: AppCompatActivity() {
+class MenuPrincipal: AuthorizedActivity() {
 
     private lateinit var binding: ActivityMenuPrincipalBinding
 
 
-    private lateinit var auth : FirebaseAuth
     private val database = Firebase.database
 
     private val messageRef = database.getReference("messages")
@@ -32,13 +31,16 @@ class MenuPrincipal: AppCompatActivity() {
         setContentView(binding.root)
         messageRef.setValue("Hello World!")
 
+        binding.editarButton.setOnClickListener(){
 
-
+            val i = Intent(this, EditarUsuario::class.java)
+            startActivity(i)
+        }
 
 
         binding.cameraActivityButton.setOnClickListener(){
             auth.signOut()
-            val i = Intent(this,IniciarSesionBinding::class.java)
+            val i = Intent(this,MainActivity::class.java)
             startActivity(i)
         }
 

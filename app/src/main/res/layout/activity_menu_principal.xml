@@ -53,7 +53,7 @@
 
 
     <com.google.android.material.card.MaterialCardView
-        android:id="@+id/paisesActivityButton"
+        android:id="@+id/editarButton"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="50dp"
@@ -112,7 +112,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/paisesActivityButton"
+        app:layout_constraintTop_toBottomOf="@+id/editarButton"
         android:clickable="true"
         android:focusable="true">
 

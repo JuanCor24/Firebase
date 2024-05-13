@@ -12,4 +12,5 @@
     <color name="md_grey_500">#F5F5F5</color>
     <color name="md_indigo_600">#3949AB</color>
     <color name="md_indigo_500">#3F51B5</color>
+    <string name="snackbar_dismiss_label">Cerrar</string>
 </resources>
