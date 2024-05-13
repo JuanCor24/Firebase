@@ -50,8 +50,11 @@ class MenuPrincipal: AppCompatActivity() {
                 for (userSnapshot in snapshot.children) {
                     val user = userSnapshot.getValue(User::class.java)
                     user?.let {
-                        // Agregar el nombre del usuario a la lista
-                        userList.add("${user.nombre} ${user.apellido}")
+                        // Verificar si el usuario está disponible antes de agregarlo a la lista
+                        if (user.disponible) {
+                            // Agregar el nombre del usuario a la lista
+                            userList.add("${user.nombre} ${user.apellido}")
+                        }
                     }
                 }
                 // Crear un adaptador para el ListView y establecerlo
