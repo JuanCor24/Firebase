@@ -8,7 +8,7 @@ import com.google.firebase.auth.auth
 
 
 open class AuthorizedActivity : AppCompatActivity() {
-    private var auth: FirebaseAuth = Firebase.auth
+    protected var auth: FirebaseAuth = Firebase.auth
     protected var currentUser = auth.currentUser
 
 

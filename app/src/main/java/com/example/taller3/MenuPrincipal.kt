@@ -21,9 +21,10 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
 
 
-class MenuPrincipal: AppCompatActivity() {
+class MenuPrincipal: AuthorizedActivity() {
 
     private lateinit var binding: ActivityMenuPrincipalBinding
+
 
 
 
@@ -40,6 +41,8 @@ class MenuPrincipal: AppCompatActivity() {
         binding = ActivityMenuPrincipalBinding.inflate(layoutInflater)
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+
+        binding.editarButton.setOnClickListener(){
 
         val listView: ListView = findViewById(R.id.listaView)
 
@@ -68,11 +71,14 @@ class MenuPrincipal: AppCompatActivity() {
         })
 
 
+            val i = Intent(this, EditarUsuario::class.java)
+            startActivity(i)
+        }
 
 
         binding.cameraActivityButton.setOnClickListener(){
             auth.signOut()
-            val i = Intent(this,IniciarSesionBinding::class.java)
+            val i = Intent(this,MainActivity::class.java)
             startActivity(i)
         }
 
