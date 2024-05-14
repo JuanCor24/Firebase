@@ -103,7 +103,7 @@ class MapsFragment:  Fragment(), SensorEventListener {
 
             // Add the marker with the updated drawable
             selectedUserMarkerOptions?.let { updatedMarkerOptions ->
-                gMap.addMarker(updatedMarkerOptions)
+               markerLocation =  gMap.addMarker(updatedMarkerOptions)
             }
             selectedUserMarkerOptions = null
         }
@@ -199,6 +199,13 @@ class MapsFragment:  Fragment(), SensorEventListener {
             fetchRouteToDestination(location.latitude, location.longitude)
 
         }
+    }
+
+    fun moveUser(location: Location){
+
+        markerLocation?.position = LatLng(location.latitude,location.longitude)
+        fetchRouteToDestination(location.latitude, location.longitude)
+
     }
 
     fun moveDog(location: Location) {

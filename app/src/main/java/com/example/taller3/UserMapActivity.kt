@@ -1,6 +1,7 @@
 package com.example.taller3
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
@@ -23,6 +24,9 @@ import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
 
 class UserMapActivity : AuthorizedActivity(), MapsFragment.RouteFetchListener {
@@ -36,7 +40,7 @@ class UserMapActivity : AuthorizedActivity(), MapsFragment.RouteFetchListener {
     private val PERM_LOCATION_CODE = 101
     private lateinit var currentLocation: Location
     private lateinit var fragment: MapsFragment
-
+    private val messageRef = database.getReference("messages/users")
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
     private lateinit var locationCallback: LocationCallback
@@ -83,13 +87,18 @@ class UserMapActivity : AuthorizedActivity(), MapsFragment.RouteFetchListener {
 
         var apellido = intent.getStringExtra("apellido")
 
+        var uid = intent.getStringExtra("uid")
+
         fragment = supportFragmentManager.findFragmentById(R.id.mapFragment) as MapsFragment
+
 
         if (latitude != 0.0 && longitude != 0.0) {
 
             val userLatLng = LatLng(latitude, longitude)
             Log.d("UserMapActivity", "Latitude: $latitude, Longitude: $longitude")
             fragment.addStore(this@UserMapActivity, userLatLng, "usuario ha encontrar", "$nombre $apellido")
+            if(uid != null){
+            startDisponibleUserUpdates(uid)}
         } else {
 
 
@@ -110,6 +119,8 @@ class UserMapActivity : AuthorizedActivity(), MapsFragment.RouteFetchListener {
             )
             myRef.updateChildren(childUpdates)
         }
+
+
 
     }
 
@@ -190,6 +201,31 @@ class UserMapActivity : AuthorizedActivity(), MapsFragment.RouteFetchListener {
             )
 
         }
+    }
+
+    private fun startDisponibleUserUpdates(uid: String){
+
+        messageRef.child(uid).addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val latitude = snapshot.child("latitud").value as Double // Retrieve latitude
+                val longitude = snapshot.child("longitud").value as Double // Retrieve longitude
+
+                // Obtenet latitude y longitud
+                Log.d("SelectedUserLocation", "Latitude: $latitude, Longitude: $longitude")
+
+                val location = Location("provider")
+                location.latitude = latitude
+                location.longitude = longitude
+
+                fragment.moveUser(location)
+
+
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Toast.makeText(this@UserMapActivity, "Error al cancelar la lectura de la base de datos", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 
     override fun onRouteFetched(routeCoordinates: List<Pair<Double, Double>>) {
