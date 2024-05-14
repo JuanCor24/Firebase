@@ -1,5 +1,6 @@
 package com.example.taller3
 
+import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -27,6 +28,16 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.Polyline
+import com.google.android.gms.maps.model.PolylineOptions
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import org.json.JSONObject
+import okhttp3.Request
+import java.io.IOException
 
 class MapsFragment:  Fragment(), SensorEventListener {
 
@@ -35,7 +46,11 @@ class MapsFragment:  Fragment(), SensorEventListener {
     val sydney = LatLng(-34.0, 151.0)
     private var dogMarker: Marker? = null
     private var selectedUserMarkerOptions: MarkerOptions? = null
+    val polylineList = mutableListOf<Polyline>()
+    var gMapPolyLine: Polyline? = null
     var zoomLevel = 15.0f
+    private var destinationLocation: LatLng? = null
+    var markerLocation: Marker? = null
     var moveCamera = true
     private val callback = OnMapReadyCallback { googleMap ->
         /**
@@ -146,7 +161,8 @@ class MapsFragment:  Fragment(), SensorEventListener {
             .position(location)
             .title(title)
             .snippet(address) // Set the address as the snippet
-        gMap.addMarker(markerOptions) }else{
+        gMap.addMarker(markerOptions)
+            fetchRouteToDestination(location.latitude, location.longitude)}else{
 
             val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
             mapFragment?.getMapAsync(callback)
@@ -155,6 +171,8 @@ class MapsFragment:  Fragment(), SensorEventListener {
                 .position(location)
                 .title(title)
                 .snippet(address)
+
+            fetchRouteToDestination(location.latitude, location.longitude)
 
         }
     }
@@ -166,6 +184,7 @@ class MapsFragment:  Fragment(), SensorEventListener {
         if (moveCamera) {
             if(this::gMap.isInitialized) {
                 gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel))
+
             }else{
 
                 Log.i("latLng", "$latLng.latitude")
@@ -178,6 +197,153 @@ class MapsFragment:  Fragment(), SensorEventListener {
 
             }
         }
+    }
+
+
+    suspend fun fetchRoute(startLat: Double, startLon: Double, endLat: Double, endLon: Double, listener: RouteFetchListener): List<Pair<Double, Double>>? {
+
+        return withContext(Dispatchers.IO) {
+            try {
+                val client = OkHttpClient()
+                val url = "http://router.project-osrm.org/route/v1/driving/$startLon,$startLat;$endLon,$endLat?geometries=geojson"
+                val request = Request.Builder()
+                    .url(url)
+                    .build()
+
+                val response = client.newCall(request).execute()
+                val jsonResponse = response.body?.string()
+
+                if (jsonResponse != null) {
+                    Log.i("HTTP Response", jsonResponse)
+                }
+
+                val routeCoordinates = mutableListOf<Pair<Double, Double>>()
+
+                if (jsonResponse != null) {
+                    val json = JSONObject(jsonResponse)
+                    val routes = json.getJSONArray("routes")
+
+                    if (routes.length() > 0) {
+                        val route = routes.getJSONObject(0)
+                        val geometry = route.getJSONObject("geometry")
+                        val coordinates = geometry.getJSONArray("coordinates")
+
+                        for (i in 0 until coordinates.length()) {
+                            val coord = coordinates.getJSONArray(i)
+                            val lon = coord.getDouble(0)
+                            val lat = coord.getDouble(1)
+                            routeCoordinates.add(Pair(lat, lon))
+                        }
+                    }
+                }
+                listener.onRouteFetched(routeCoordinates)
+                routeCoordinates // Return the route coordinates
+            } catch (e: IOException) {
+                // Handle network error
+                Log.e("RouteCoordinates", "Failed to fetch route coordinates ", e)
+                e.printStackTrace()
+                null // Return null in case of error
+            }
+        }
+
+    }
+
+    private fun fetchRouteToDestination(destinationLat: Double, destinationLon: Double) {
+        CoroutineScope(Dispatchers.Main).launch {
+            val activity = requireActivity() as? RouteFetchListener
+            if (activity != null) {
+                // Get user's current location from the Maps Activity
+                (requireActivity() as? UserMapActivity)?.getCurrentLocation { userLocation ->
+                    // Call fetchRoute and pass user's location and destination
+                    CoroutineScope(Dispatchers.Main).launch {
+                        val routeCoordinates = fetchRoute(
+                            userLocation.latitude,
+                            userLocation.longitude,
+                            destinationLat,
+                            destinationLon,
+                            activity
+                        )
+
+                        if(gMapPolyLine != null){
+                            gMapPolyLine?.remove()
+                        }
+
+                        if (routeCoordinates != null) {
+                            Log.i("RouteCoordinates", "Number of coordinates: ${routeCoordinates.size}")
+                            for ((index, coordinate) in routeCoordinates.withIndex()) {
+                                Log.i("RouteCoordinates", "Coordinate $index: (${coordinate.first}, ${coordinate.second})")
+                            }
+
+                            if (routeCoordinates != null) {
+                                // Convertir routeCoordinates a una lista de LatLng
+                                val latLngList = mutableListOf<LatLng>()
+                                for (coordinate in routeCoordinates) {
+                                    val latLng = LatLng(coordinate.first, coordinate.second)
+                                    latLngList.add(latLng)
+                                }
+
+                                // Log de las coordenadas convertidas
+                                Log.i("RouteCoordinates", "Number of coordinates: ${latLngList.size}")
+                                for ((index, latLng) in latLngList.withIndex()) {
+                                    Log.i("RouteCoordinates", "Coordinate $index: (${latLng.latitude}, ${latLng.longitude})")
+                                }
+
+                                if (polylineList.isNotEmpty()) {
+                                    // Remover la polilínea existente
+                                    val existingPolyline = polylineList.removeAt(0)
+
+                                    existingPolyline?.points?.clear()
+
+                                    for (polyline in polylineList) {
+                                        polyline.remove()
+                                    }
+                                    polylineList.clear()
+                                    existingPolyline.isVisible = false
+                                    existingPolyline?.points?.let { points ->
+                                        if (points.isNotEmpty()) {
+                                            points.forEachIndexed { index, point ->
+                                                Log.i("Point poly $index", "$point")
+                                            }
+                                        } else {
+                                            Log.i("Existing Polyline", "No points remaining.")
+                                        }
+                                    }
+
+
+
+
+
+                                }
+
+                                // Crear PolylineOptions
+                                val polylineOptions = PolylineOptions().apply {
+                                    color(ContextCompat.getColor(requireContext(), R.color.md_indigo_A100))
+                                    width(10f)
+                                    addAll(latLngList)
+                                }
+
+                                // Añadir polyline al mapa
+                                val polyline = gMap.addPolyline(polylineOptions)
+                                polylineList.add(polyline)
+                                gMapPolyLine = gMap.addPolyline(polylineOptions)
+                            }
+
+                        } else {
+                            Log.e("RouteCoordinates", "Failed to fetch route coordinates ")
+                        }
+                    }
+
+                    Log.i("userLocation", "${userLocation.latitude}")
+                    Log.i("userLocation", "${userLocation.longitude}")
+                }
+            } else {
+                Log.e(ContentValues.TAG, "Activity does not implement RouteFetchListener")
+            }
+        }
+    }
+
+    interface RouteFetchListener {
+        fun onRouteFetched(routeCoordinates: List<Pair<Double, Double>>)
     }
 
 

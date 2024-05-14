@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.os.Looper
 import android.util.Log
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -24,7 +25,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.database
 
-class UserMapActivity : AuthorizedActivity() {
+class UserMapActivity : AuthorizedActivity(), MapsFragment.RouteFetchListener {
 
     private lateinit var binding: ActivityUserMapBinding
     private val database = Firebase.database
@@ -189,6 +190,47 @@ class UserMapActivity : AuthorizedActivity() {
             )
 
         }
+    }
+
+    override fun onRouteFetched(routeCoordinates: List<Pair<Double, Double>>) {
+        Log.i("RouteCoordinates", "Number of coordinates: ${routeCoordinates.size}")
+        for ((index, coordinate) in routeCoordinates.withIndex()) {
+            Log.i("RouteCoordinates", "Coordinate $index: (${coordinate.first}, ${coordinate.second})")
+        }
+    }
+
+    open fun getCurrentLocation(callback: (Location) -> Unit) {
+        // Check for location permissions before requesting location updates
+
+        // Request last known location from FusedLocationProviderClient
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return
+        }
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location: Location? ->
+                // Check if location is not null
+                if (location != null) {
+                    // Pass the location to the callback function
+                    callback(location)
+                } else {
+                    // Handle case where last known location is not available
+                    // You may need to request location updates or handle this case differently based on your requirements
+                }
+            }
     }
 
 
