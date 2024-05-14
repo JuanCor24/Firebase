@@ -26,15 +26,9 @@ class MenuPrincipal: AuthorizedActivity() {
     private lateinit var binding: ActivityMenuPrincipalBinding
 
 
-
-
-    private lateinit var auth : FirebaseAuth
     private val database = Firebase.database
 
     private val messageRef = database.getReference("messages/users")
-
-
-
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,7 +36,6 @@ class MenuPrincipal: AuthorizedActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        binding.editarButton.setOnClickListener(){
 
         val listView: ListView = findViewById(R.id.listaView)
 
@@ -71,6 +64,8 @@ class MenuPrincipal: AuthorizedActivity() {
         })
 
 
+            binding.editarButton.setOnClickListener(){
+
             val i = Intent(this, EditarUsuario::class.java)
             startActivity(i)
         }
@@ -94,6 +89,8 @@ class MenuPrincipal: AuthorizedActivity() {
                 "disponible" to true
             )
             myRef.updateChildren(childUpdates)
+
+            startActivity(Intent(this, UserMapActivity::class.java))
         }
     }
 

@@ -23,7 +23,7 @@
             android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="200dp"
+            android:layout_marginTop="100dp"
             android:background="@drawable/title_bg"
             android:paddingHorizontal="126dp"
             android:paddingVertical="15dp"
@@ -120,18 +120,50 @@
             app:layout_constraintTop_toBottomOf="@id/correo" />
 
         <Button
-            android:id="@+id/button"
+            android:id="@+id/buttonApellido"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
-            android:layout_marginBottom="50dp"
-            android:backgroundTint="@color/md_indigo_A100"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="90dp"
             android:background="@drawable/iniciar_button"
-            android:text="Cambiar nombre y apellido"
+            android:backgroundTint="@color/md_indigo_A100"
+            android:text="Cambiar Apellido"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/buttonNombre" />
+
+        <Button
+            android:id="@+id/buttonNombre"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginEnd="80dp"
+            android:layout_marginBottom="140dp"
+            android:background="@drawable/iniciar_button"
+            android:backgroundTint="@color/md_indigo_A100"
+            android:text="Cambiar Nombre"
             android:textColor="@color/white"
             android:textSize="20sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/correo_form" />
+
+        <Button
+            android:id="@+id/aceptar"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginTop="60dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/iniciar_button"
+            android:backgroundTint="@color/md_indigo_A100"
+            android:text="Aceptar"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/buttonApellido" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
