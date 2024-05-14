@@ -98,7 +98,7 @@ class MapsFragment:  Fragment(), SensorEventListener {
         }
 
         if(selectedUserMarkerOptions != null){
-            
+
             selectedUserMarkerOptions = selectedUserMarkerOptions?.icon(bitmapDescriptorFromVector(this,R.drawable.baseline_location_on_24))
 
             // Add the marker with the updated drawable

@@ -69,7 +69,7 @@ class ListaUsuarios : AppCompatActivity() {
             val (selectedUid, selectedUser) = userListwithUID[position] // UID and User
 
 
-            messageRef.child(selectedUid).addListenerForSingleValueEvent(object : ValueEventListener {
+            messageRef.child(selectedUid).addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val latitude = snapshot.child("latitud").value as Double // Retrieve latitude
                     val longitude = snapshot.child("longitud").value as Double // Retrieve longitude
