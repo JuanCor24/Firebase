@@ -14,12 +14,14 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.taller3.adapters.CustomInfoWindowAdapter
 import com.google.android.gms.maps.CameraUpdate
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.MapsInitializer
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptor
@@ -74,6 +76,7 @@ class MapsFragment:  Fragment(), SensorEventListener {
 
 
         gMap = googleMap
+
         gMap.uiSettings.isZoomControlsEnabled = false
         gMap.uiSettings.isCompassEnabled = true
 
@@ -95,9 +98,17 @@ class MapsFragment:  Fragment(), SensorEventListener {
         }
 
         if(selectedUserMarkerOptions != null){
-            gMap.addMarker(selectedUserMarkerOptions!!)
+            
+            selectedUserMarkerOptions = selectedUserMarkerOptions?.icon(bitmapDescriptorFromVector(this,R.drawable.baseline_location_on_24))
+
+            // Add the marker with the updated drawable
+            selectedUserMarkerOptions?.let { updatedMarkerOptions ->
+                gMap.addMarker(updatedMarkerOptions)
+            }
             selectedUserMarkerOptions = null
         }
+
+
 
 
     }
@@ -140,6 +151,16 @@ class MapsFragment:  Fragment(), SensorEventListener {
         //Do Nothing
     }
 
+    private fun bitmapDescriptorFromVector(fragment: Fragment, @DrawableRes vectorResId: Int): BitmapDescriptor? {
+        return ContextCompat.getDrawable(fragment.requireContext(), vectorResId)?.run {
+            setBounds(0, 0, intrinsicWidth, intrinsicHeight)
+            val bitmap = Bitmap.createBitmap(intrinsicWidth, intrinsicHeight, Bitmap.Config.ARGB_8888)
+            draw(Canvas(bitmap))
+            BitmapDescriptorFactory.fromBitmap(bitmap)
+        }
+    }
+
+
     //From https://stackoverflow.com/questions/42365658/custom-marker-in-google-maps-in-android-with-vector-asset-icon
     private fun bitmapDescriptorFromVector(context: Context, vectorResId: Int): BitmapDescriptor? {
         return ContextCompat.getDrawable(context, vectorResId)?.run {
@@ -160,7 +181,9 @@ class MapsFragment:  Fragment(), SensorEventListener {
         val markerOptions = MarkerOptions()
             .position(location)
             .title(title)
-            .snippet(address) // Set the address as the snippet
+            .snippet(address)
+
+            // Set the address as the snippet
         gMap.addMarker(markerOptions)
             fetchRouteToDestination(location.latitude, location.longitude)}else{
 
@@ -171,6 +194,7 @@ class MapsFragment:  Fragment(), SensorEventListener {
                 .position(location)
                 .title(title)
                 .snippet(address)
+
 
             fetchRouteToDestination(location.latitude, location.longitude)
 
