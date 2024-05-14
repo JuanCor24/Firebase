@@ -92,6 +92,10 @@ class MenuPrincipal: AuthorizedActivity() {
 
             startActivity(Intent(this, UserMapActivity::class.java))
         }
+
+        binding.listaUsuarios.setOnClickListener(){
+            startActivity(Intent(this, ListaUsuarios::class.java))
+        }
     }
 
 
