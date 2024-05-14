@@ -167,7 +167,7 @@ class RegistrarseActivity:AppCompatActivity() {
 
                             }
                             Toast.makeText(applicationContext, "Usuario registrado", Toast.LENGTH_SHORT).show()
-                            startActivity(Intent(this@RegistrarseActivity, MainActivity::class.java))
+                            startActivity(Intent(this@RegistrarseActivity, MenuPrincipal::class.java))
                         } else {
                             // Update failed, display a message to the user
                             Toast.makeText(applicationContext, "Error al actualizar el perfil del usuario", Toast.LENGTH_SHORT).show()
