@@ -40,7 +40,7 @@ class ListaUsuarios : AppCompatActivity() {
 
         val listView: ListView = findViewById(R.id.usuariosDisponibles)
 
-        messageRef.addListenerForSingleValueEvent(object : ValueEventListener {
+        messageRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val userList = mutableListOf<String>()
                 for (userSnapshot in snapshot.children) {

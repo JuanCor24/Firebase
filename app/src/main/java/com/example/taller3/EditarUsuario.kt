@@ -119,6 +119,19 @@ class EditarUsuario : AuthorizedActivity() {
             startActivity(Intent(this, MenuPrincipal::class.java))
         }
 
+        binding.correo.setOnClickListener(){
+
+            if(binding.nuevoCorreo.text != null) {
+                auth.currentUser?.verifyBeforeUpdateEmail(binding.nuevoCorreo.text.toString())
+            }
+
+        }
+
+        binding.correoForm.setOnClickListener(){
+            auth.sendPasswordResetEmail(currentUser?.email.toString())
+
+        }
+
 
     }
 }
